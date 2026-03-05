@@ -166,7 +166,6 @@
     <script>
         let currentEditIndex = null;
 
-        // UPDATED: Your exact list with the intentional u=swap images
         const forceUpdateData = [
             { "id": 101, "name": "Sarah Chen", "role": "Lead Software Architect", "salary": 115000, "age": 29, "gender": "Female", "image": "https://i.pravatar.cc/150?u=sarah", "bio": "Specializes in React and Node.js. A logic-driven leader who loves mountain biking on weekends.", "history": ["Senior Dev at TechFlow"] },
             { "id": 102, "name": "Marcus Rodriguez", "role": "Senior UI/UX Designer", "salary": 78000, "age": 31, "gender": "Male", "image": "https://i.pravatar.cc/150?u=elena", "bio": "Focused on accessible design and minimalist aesthetics. Former street photographer with an eye for detail.", "history": ["Visual Designer at Studio Indigo"] },
@@ -177,12 +176,10 @@
             { "id": 107, "name": "Hannah Vance", "role": "QA Automation Engineer", "salary": 75000, "age": 26, "gender": "Female", "image": "https://i.pravatar.cc/150?u=isaac", "bio": "Detail-oriented bug hunter. Passionate about automation frameworks and collecting vintage video games.", "history": ["Junior QA at SoftTest"] }
         ];
 
-        // Ensure Admin and Employee pages use the SAME data
         if (!localStorage.getItem('employeeData')) {
             localStorage.setItem('employeeData', JSON.stringify(forceUpdateData));
         }
         
-        // This ensures if you changed the images in the prompt, they update here too
         let employeeData = JSON.parse(localStorage.getItem('employeeData'));
 
         function showToast(msg) {
@@ -260,7 +257,27 @@
             if (action === 'dayoff') {
                 area.innerHTML = `<p style="margin-top:15px; color:#64748b; font-size:0.85rem;">This marks them 'Off Duty' and moves them to Archive.</p>`;
             } else if (action === 'promote') {
-                area.innerHTML = `<div class="input-group"><label>New Role</label><input type="text" id="actionVal" placeholder="New Title"></div>`;
+                area.innerHTML = `
+                    <div class="input-group">
+                        <label>Select New Role</label>
+                        <select id="actionVal">
+                            <option value="Department Director">Department Director</option>
+                            <option value="Principal Engineer">Principal Engineer</option>
+                            <option value="Chief Operations Officer">Chief Operations Officer</option>
+                            <option value="VP of Product">VP of Product</option>
+                            <option value="Executive Creative Director">Executive Creative Director</option>
+                        </select>
+                    </div>`;
+            } else if (action === 'paidvacation') {
+                area.innerHTML = `
+                    <div class="input-group">
+                        <label>Duration (Days)</label>
+                        <input type="number" id="vacationDays" placeholder="7">
+                    </div>
+                    <div class="input-group">
+                        <label>Daily Stipend ($)</label>
+                        <input type="number" id="vacationRate" placeholder="200">
+                    </div>`;
             } else if (action === 'raise' || action === 'pay') {
                 area.innerHTML = `<div class="input-group"><label>Amount ($)</label><input type="number" id="actionVal" value="500"></div>`;
             }
@@ -269,7 +286,6 @@
         document.getElementById('confirmBtn').onclick = () => {
             const action = document.getElementById('actionSelect').value;
             const emp = employeeData[currentEditIndex];
-            const today = new Date().toLocaleDateString();
 
             if (action === 'dayoff' || action === 'fire') {
                 emp.status = (action === 'fire') ? 'Terminated' : 'Inactive';
@@ -279,7 +295,13 @@
                 showToast("Moved to Archive");
             } else if (action === 'promote') {
                 emp.role = document.getElementById('actionVal').value;
-                showToast("Promotion applied");
+                showToast(`Promoted to ${emp.role}`);
+            } else if (action === 'paidvacation') {
+                const days = parseInt(document.getElementById('vacationDays').value) || 0;
+                const rate = parseInt(document.getElementById('vacationRate').value) || 0;
+                const total = days * rate;
+                emp.salary += total;
+                showToast(`Vacation approved: $${total} added to balance`);
             } else if (action === 'raise' || action === 'pay') {
                 const amt = parseInt(document.getElementById('actionVal').value);
                 emp.salary += amt;
