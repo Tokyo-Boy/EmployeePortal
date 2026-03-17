@@ -68,20 +68,23 @@
     </main>
 
     <script>
-        // YOUR EXACT DATA LIST
-        const updatedStaff = [
-            { "id": 101, "name": "Sarah Chen", "role": "Lead Software Architect", "salary": 115000, "age": 29, "gender": "Female", "image": "https://i.pravatar.cc/150?u=sarah", "bio": "Specializes in React and Node.js. A logic-driven leader who loves mountain biking on weekends.", "history": ["Senior Dev at TechFlow", "Open Source Contributor"] },
-            { "id": 102, "name": "Marcus Rodriguez", "role": "Senior UI/UX Designer", "salary": 78000, "age": 31, "gender": "Male", "image": "https://i.pravatar.cc/150?u=elena", "bio": "Focused on accessible design and minimalist aesthetics. Former street photographer with an eye for detail.", "history": ["Visual Designer at Studio Indigo", "Freelance Illustrator"] },
-            { "id": 103, "name": "Aisha Khan", "role": "Growth Marketing Manager", "salary": 84000, "age": 34, "gender": "Female", "image": "https://i.pravatar.cc/150?u=aisha", "bio": "Expert in digital growth and viral storytelling. Former journalist and competitive marathon runner.", "history": ["PR Specialist at Global Media", "Digital Lead at Spark"] },
-            { "id": 104, "name": "James Wilson", "role": "Backend Security Engineer", "salary": 92000, "age": 27, "gender": "Male", "image": "https://i.pravatar.cc/150?u=james", "bio": "Database wizard and cybersecurity enthusiast. Built his own automated greenhouse from scratch.", "history": ["Security Analyst at Shield Logic", "Junior Backend at DevGrid"] },
-            { "id": 105, "name": "Isaac Crawford", "role": "Senior Data Scientist", "salary": 108000, "age": 32, "gender": "Male", "image": "https://i.pravatar.cc/150?u=hannah", "bio": "Predictive modeling specialist. Spends his weekends playing competitive chess and baking sourdough.", "history": ["Data Analyst at QuantEdge", "Research Fellow at Tech-U"] },
-            { "id": 106, "name": "Elena Rossi", "role": "Senior Product Owner", "salary": 110000, "age": 30, "gender": "Female", "image": "https://i.pravatar.cc/150?u=marcus", "bio": "Bridges the gap between users and tech. Passionate about classical music and gourmet Italian cooking.", "history": ["Product Manager at FinTech", "Scrum Master at AlphaHub"] },
-            { "id": 107, "name": "Hannah Vance", "role": "QA Automation Engineer", "salary": 75000, "age": 26, "gender": "Female", "image": "https://i.pravatar.cc/150?u=isaac", "bio": "Detail-oriented bug hunter. Passionate about automation frameworks and collecting vintage video games.", "history": ["Junior QA at SoftTest", "Automation Intern at BetaWorks"] }
+        // 1. DEFAULT DATA: Only used if LocalStorage is empty
+        const defaultStaff = [
+            { "id": 101, "name": "Sarah Chen", "role": "Lead Software Architect", "salary": 115000, "age": 29, "gender": "Female", "image": "https://i.pravatar.cc/150?u=sarah", "bio": "Specializes in React and Node.js.", "history": ["Senior Dev at TechFlow"] },
+            { "id": 102, "name": "Marcus Rodriguez", "role": "Senior UI/UX Designer", "salary": 78000, "age": 31, "gender": "Male", "image": "https://i.pravatar.cc/150?u=elena", "bio": "Focused on accessible design.", "history": ["Visual Designer at Studio Indigo"] },
+            { "id": 103, "name": "Aisha Khan", "role": "Growth Marketing Manager", "salary": 84000, "age": 34, "gender": "Female", "image": "https://i.pravatar.cc/150?u=aisha", "bio": "Expert in digital growth.", "history": ["PR Specialist at Global Media"] },
+            { "id": 104, "name": "James Wilson", "role": "Backend Security Engineer", "salary": 92000, "age": 27, "gender": "Male", "image": "https://i.pravatar.cc/150?u=james", "bio": "Database wizard.", "history": ["Security Analyst at Shield Logic"] },
+            { "id": 105, "name": "Isaac Crawford", "role": "Senior Data Scientist", "salary": 108000, "age": 32, "gender": "Male", "image": "https://i.pravatar.cc/150?u=hannah", "bio": "Predictive modeling specialist.", "history": ["Data Analyst at QuantEdge"] },
+            { "id": 106, "name": "Elena Rossi", "role": "Senior Product Owner", "salary": 110000, "age": 30, "gender": "Female", "image": "https://i.pravatar.cc/150?u=marcus", "bio": "Bridges the gap between users and tech.", "history": ["Product Manager at FinTech"] },
+            { "id": 107, "name": "Hannah Vance", "role": "QA Automation Engineer", "salary": 75000, "age": 26, "gender": "Female", "image": "https://i.pravatar.cc/150?u=isaac", "bio": "Detail-oriented bug hunter.", "history": ["Junior QA at SoftTest"] }
         ];
 
-        // FORCE REFRESH: This line ensures your new image mappings overwrite any old saved data
-        localStorage.setItem('employeeData', JSON.stringify(updatedStaff));
+        // 2. INITIALIZATION LOGIC: Don't overwrite existing data!
+        if (!localStorage.getItem('employeeData')) {
+            localStorage.setItem('employeeData', JSON.stringify(defaultStaff));
+        }
 
+        // 3. GET DATA: Always pull the current state from the "Database"
         const data = JSON.parse(localStorage.getItem('employeeData'));
         const userIndex = localStorage.getItem('currentUserIndex');
 
@@ -90,7 +93,12 @@
             if (userIndex === null) {
                 renderSelectionList(container);
             } else {
-                renderPrivateDashboard(container, data[userIndex]);
+                // Check if the user still exists (in case Admin deleted/fired them)
+                if (data[userIndex]) {
+                    renderPrivateDashboard(container, data[userIndex]);
+                } else {
+                    logout();
+                }
             }
         }
 
@@ -127,20 +135,19 @@
                         <span class="badge status-active">● Active</span>
                     </div>
 
-                    ${emp.feedback ? `
-                        <div class="feedback-box">
-                            <div class="feedback-header">💬 Message from Management</div>
-                            <p style="margin:0;">${emp.feedback}</p>
-                        </div>
-                    ` : `
-                        <div class="feedback-box" style="border-left-color: #cbd5e1; background: #f8fafc;">
-                            <p style="margin:0; color: #64748b;">No new messages from management.</p>
-                        </div>
-                    `}
+                    <div class="feedback-box">
+                        <div class="feedback-header">💬 Job Information</div>
+                        <p style="margin:0;">Your profile is managed by the system administrator.</p>
+                    </div>
 
                     <div style="margin-top: 20px;">
                         <h4 class="stat-label">Current Role</h4>
-                        <p><strong>${emp.role}</strong></p>
+                        <p style="font-size: 1.2rem; color: var(--primary);"><strong>${emp.role}</strong></p>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h4 class="stat-label">Current Salary (Annual)</h4>
+                        <p><strong>$${emp.salary.toLocaleString()}</strong></p>
                     </div>
                 </div>
             `;
